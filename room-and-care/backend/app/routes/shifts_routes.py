@@ -2,9 +2,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import date
-from ..database import get_db
-from ..models.shift import Shift
-from ..schemas.schemas import ShiftCreate, Shift
+from app.database import get_db
+from app.models.shift import Shift
+from app.schemas.schemas import ShiftCreate, Shift
 from app.models.employee import Employee
 
 router = APIRouter()

@@ -1,4 +1,8 @@
 # backend/app/utils/payroll_calculator.py
+from  app.routes.shifts_routes import Shift
+from app.routes.employees_routes import Employee
+from datetime import date
+from sqlalchemy.orm import Session
 def calculate_payroll(employee_id: int, start_date: date, end_date: date, db: Session):
     shifts = db.query(Shift).filter(
         Shift.employee_id == employee_id,

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Date, Time, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
-from .base import Base
+from app.database import Base
 
 class Shift(Base):
     __tablename__ = "shifts"
