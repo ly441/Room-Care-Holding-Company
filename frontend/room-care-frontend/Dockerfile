@@ -1,13 +1,15 @@
-# Step 1: Build app
-FROM node:18 AS builder
+
+# Use an official Node image to build the frontend
+FROM node:18 AS build
+
 WORKDIR /app
-COPY . .
+COPY package*.json ./
 RUN npm install
+COPY . .
 RUN npm run build
 
-# Step 2: Serve with nginx
-FROM nginx:stable-alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Use an Nginx image to serve the build
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

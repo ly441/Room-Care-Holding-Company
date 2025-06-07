@@ -1,31 +1,40 @@
-version: '3.8'
-services:
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_DB: room_and_care
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
 
+version: "3.9"
+
+services:
   backend:
-    build: ./backend
+    build:
+      context: ./room_and_care/backend
+    container_name: room-care-backend
     ports:
       - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql://postgres:postgress@localhost`:5432/room_and_care
+    env_file:
+      - ./room_and_care/backend/.venv
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./room_and_care/backend:/app
     depends_on:
       - db
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend/room-care-frontend
+    container_name: room-care-frontend
     ports:
-      - "8080:8080"
-    depends_on:
-      - backend
+      - "8080:80"
+
+  db:
+    image: postgres:13
+    container_name: room-care-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: room_and_care
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
 volumes:
   postgres_data:
