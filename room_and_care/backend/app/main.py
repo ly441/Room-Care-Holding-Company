@@ -1,13 +1,13 @@
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from  app.database import engine
-from  app.database import Base
-from  app.routes.branches_routes import Branch
-from  app.routes.employees_routes import Employee
-from  app.routes.shifts_routes import Shift
-from  app.utils.auth import APIRouter
+from app.database import engine, Base
+from app.routes.auth_routes import router as auth_router
+from app.routes.branches_routes import router as branches_router
+from app.routes.employees_routes import router as employees_router
+from app.routes.shifts_routes import router as shifts_router
 
-Base.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(APIRouter.router, prefix="/api/auth", tags=["auth"])
-app.include_router(Branch.router, prefix="/api/branches", tags=["branches"])
-app.include_router(Employee.router, prefix="/api/employees", tags=["employees"])
-app.include_router(Shift.router, prefix="/api/shifts", tags=["shifts"])
+app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
+app.include_router(branches_router, prefix="/api/branches", tags=["branches"])
+app.include_router(employees_router, prefix="/api/employees", tags=["employees"])
+app.include_router(shifts_router, prefix="/api/shifts", tags=["shifts"])
