@@ -1,8 +1,8 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
-from app.routes.auth_routes import router as auth_router
+from room_and_care.backend.app.database import engine, Base
+from room_and_care.backend.app.routes.auth_routes import router as auth_router
 from app.routes.branches_routes import router as branches_router
 from app.routes.employees_routes import router as employees_router
 from app.routes.shifts_routes import router as shifts_router

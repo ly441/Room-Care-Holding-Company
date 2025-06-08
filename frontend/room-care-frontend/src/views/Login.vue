@@ -1,66 +1,71 @@
 
-<template>
-  <div class="login-container">
-    <h2>Room and Care Login</h2>
-    <form @submit.prevent="handleLogin">
-      <input v-model="email" placeholder="Email" type="email" required />
-      <input v-model="password" placeholder="Password" type="password" required />
-      <button type="submit" :disabled="loading">
-        {{ loading ? "Logging in..." : "Login" }}
-      </button>
-      <p v-if="error" class="error">{{ error }}</p>
-    </form>
-  </div>
-</template>
+import { createStore } from "vuex";
+import axios from "axios";
 
-<script>
-import { ref } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
-
-export default {
-  setup() {
-    const email = ref("");
-    const password = ref("");
-    const error = ref("");
-    const loading = ref(false);
-
-    const store = useStore();
-    const router = useRouter();
-
-    const handleLogin = async () => {
-      error.value = "";
-      loading.value = true;
-      try {
-        await store.dispatch("login", {
-          email: email.value,
-          password: password.value,
-        });
-        router.push("/dashboard");
-      } catch (err) {
-        error.value = err.message || "Login failed. Please check your credentials.";
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    return { email, password, error, loading, handleLogin };
+export default createStore({
+  state: {
+    token: localStorage.getItem("token") || "",
+    branches: [],
+    employees: [],
   },
-};
-</script>
 
-<style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  margin-top: 50px;
-}
+  mutations: {
+    setToken(state, token) {
+      state.token = token;
+      if (token) {
+        localStorage.setItem("token", token);
+      } else {
+        localStorage.removeItem("token");
+      }
+    },
+    setBranches(state, branches) {
+      state.branches = branches;
+    },
+  },
 
-.error {
-  color: red;
-  margin-top: 10px;
-}
-</style>
+  actions: {
+    async login({ commit }, credentials) {
+      try {
+        const params = new URLSearchParams();
+        params.append("email", credentials.email); // adjust to 'email' only if backend expects it
+        params.append("password", credentials.password);
+
+        const response = await axios.post(
+          "http://localhost:8000/api/auth/token",
+          params,
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          }
+        );
+
+        commit("setToken", response.data.access_token);
+      } catch (error) {
+        console.error("Login error:", error.response?.data || error.message);
+        throw new Error("Invalid login credentials");
+      }
+    },
+
+    logout({ commit }) {
+      commit("setToken", "");
+    },
+
+    async fetchBranches({ commit, state }) {
+      try {
+        const response = await axios.get("http://localhost:8000/api/branches/", {
+          headers: {
+            Authorization: `Bearer ${state.token}`,
+          },
+        });
+        commit("setBranches", response.data);
+      } catch (error) {
+        console.error("Failed to fetch branches:", error.response?.data || error.message);
+      }
+    },
+  },
+
+  getters: {
+    isAuthenticated: (state) => !!state.token,
+  },
+});

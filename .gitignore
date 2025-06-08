@@ -10,5 +10,6 @@
 *.sig
 
 pkg/
+.vscode/
 pipfile/
 pipfile.lock/
